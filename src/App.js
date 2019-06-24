@@ -15,22 +15,24 @@ class App extends Component {
       this.setState({ books })
     })
   }
+  /*.filter() :https://stackoverflow.com/questions/43643877/filtering-a-list-with-react  also in udacity program filter and map methods*/
   getCategoryBooks(title){
+    //get shelf's of books
     return this.state.books.filter((book) =>
-      book.shelf ===title
+      book.shelf === title
     )
   };
-  onChangeBookList=(book,list)=>{
-    BooksAPI.update(book,list).then(()=>{
-      book.shelf=list;
-      this.setState(state =>({
-        books:this.state.books.filter(b=>b.id !== book.id).concat([book])
-      }))
+  onChangeBookList=(book,shelf)=>{
+    //update book shelf with using api
+    BooksAPI.update(book,shelf).then(()=>{
+      book.shelf = shelf;
+      this.setState(() =>({books:this.state.books.filter(b=>b.id !== book.id).concat(book)}))
     })
   }
   render() {
     return (
       <div className='app'>
+      {/* Route render:https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/Route.md*/}
       <Route exact path='/' render={()=>(
         <div className="list-books">
           <div className="list-books-title">
@@ -43,11 +45,13 @@ class App extends Component {
                 <BookList books={this.getCategoryBooks("read")} title="Read" onChangeBookList={this.onChangeBookList}/>
             </div>
             <div className="open-search">
+            {/*Link render:https://github.com/ReactTraining/react-router/blob/master/packages/react-router-dom/docs/api/Link.md */}
               <Link to="/search" className='button'> Add book/s</Link>
             </div>
           </div>
           </div>
         )}/>
+        {/* Route render:https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/Route.md*/}
         <Route path='/search' render={()=>(
           <SearchPage books={this.state.books} onChangeBookList={this.onChangeBookList}/>
           )}/>

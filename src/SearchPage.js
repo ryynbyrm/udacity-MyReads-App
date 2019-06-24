@@ -6,33 +6,31 @@ import SearchBox from './SearchBox'
 class SearchPage extends Component {
     state = {
         text:"",
-        books: [],
         filterBooks:[]
     }
     onSearchTextChange = (text) => {
-        this.setState({text:text})
-        if(text){
-            BooksAPI.search(text.trim()).then((books)=>{
-                if(books.length)
-                {
-                    books.forEach((book,i)=>{
-                        const matched=this.props.books.find((b)=>b.id===book.id);
-                        book.shelf=matched? matched.shelf:'none';
-                        books[i]=book;
-                    });
-                    this.setState({filterBooks:books })
-                }
-                else{
-                    this.setState({filterBooks:[]}); 
-                }
-            })
+        this.setState({text})
+        //update filterBooks when text is null or empty
+        if(!text) {
+            this.setState({filterBooks:null}); 
         }
-        else{
-            this.setState({filterBooks:[]}); 
-        }
-    }
-    componentWillUnmount(){
-        this.onSearchTextChange("")
+        BooksAPI.search(text).then((searched)=>
+        {
+            if(searched && searched.length)
+            {
+                 //change filterbooks shelf if user choose any shelf
+                this.setState({filterBooks:searched.map(search => {
+                    let inShelf = this.props.books.filter(book => book.id === search.id);
+                    search.shelf= inShelf && inShelf.length ? inShelf[0].shelf : "none";
+                    return search;
+                  }) 
+                })
+            }
+            //when there isn't any book
+            else {
+                this.setState({filterBooks:null}); 
+            }
+        })
     }
     render(){
         return(
@@ -40,8 +38,8 @@ class SearchPage extends Component {
                 <SearchBox onSearchTextChange={this.onSearchTextChange}/> 
                 <div className="search-books-results">
                     <ol className='books-grid' >
-                        {
-                            this.state.filterBooks !== null ?
+                        {//using function and object binding on props
+                            this.state.filterBooks ?
                                 (this.state.filterBooks.map((book)=>(
                                     <Book key={book.id} book={book} onChangeBookList={this.props.onChangeBookList} />
                                 ))):
